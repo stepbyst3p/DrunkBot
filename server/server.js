@@ -25,11 +25,7 @@ MongoClient.connect(db.url, (err, database) => {
 });
 
 app.post("/bars", (req, res) => {
-  console.log(req);
-  const geo = {
-    latitude: req.body.lat,
-    longitude: req.body.lng
-  };
+  console.log(req.body);
   ref.once("value", function(snapshot) {
     const Data = snapshot.val();
     const bars = _.map(Data, (spot, barId) => ({
@@ -47,5 +43,26 @@ app.post("/bars", (req, res) => {
     // console.log(sortedGeocodes);
     // _.find(spots, { geocode: sortedGeocodes[0] });
     // res.send(sortedGeocodesn.slice(0, 5));
+  });
+});
+
+app.post("/beers", (req, res) => {
+  const barTitle = req.body.barTitle;
+  // console.log(req.body);
+  ref.once("value", function(snapshot) {
+    const Data = snapshot.val();
+    // console.log(Data);
+    const beers = _.find(Data, o => {
+      return o.title === barTitle;
+    });
+    const beerList = _.map(beers.beers, (beer, beerTitle) => ({
+      title: beer.beerTitle,
+      brewery: beer.beerBrewery,
+      style: beer.beerStyle,
+      alc: beer.beerAlc
+    }));
+    // console.log(beers.beers);
+    console.log(beerList);
+    res.send({ beerList });
   });
 });

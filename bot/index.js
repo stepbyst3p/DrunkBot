@@ -3,51 +3,54 @@ const request = require("request");
 const token = "460387748:AAG62Hlk3qCTKuY_KnZ-7CygPmp0V6-kmPQ";
 const bot = new TelegramBot(token, { polling: true });
 const emoji = require("node-emoji").emoji;
+const _ = require("lodash");
 const headers = {
   "User-Agent": "Super Agent/0.0.1",
   "Content-Type": "application/x-www-form-urlencoded"
 };
 
-const options = {
+const optionsBars = {
   url: "http://localhost:8000/bars",
   method: "POST",
   headers: headers,
   form: { lat: "xxx", lng: "yyy" }
 };
 
-// Matches "/echo [whatever]"
+const optionsBeers = {
+  url: "http://localhost:8000/beers",
+  method: "POST",
+  headers: headers,
+  form: { barTitle: "" }
+};
+
+const markDownOption = {
+  parse_mod: "markdown"
+};
+
 bot.onText(/\/echo (.+)/, (msg, match) => {
-  // 'msg' is the received Message from Telegram
-  // 'match' is the result of executing the regexp above on the text content
-  // of the message
-
   const chatId = msg.chat.id;
-  const resp = match[1]; // the captured "whatever"
+  const resp = match[1];
 
-  // send back the matched "whatever" to the chat
   bot.sendMessage(chatId, resp);
 });
 
-// Listen for any kind of message. There are different kinds of
-// messages.
 bot.on("message", msg => {
   const chatId = msg.chat.id;
-  console.log(msg.location);
-  request(options, function(error, response, body) {
+  // console.log(msg.location);
+  request(optionsBars, function(error, response, body) {
     if (!error) {
       const bars = JSON.parse(body);
-      // console.log(bars);
 
       let options = {
         reply_markup: JSON.stringify({
           keyboard: bars.map(bar => {
             const button = [
               {
-                text: emoji.beer + bar.title,
+                text: bar.title,
                 callback_data: bar.barId
               }
             ];
-            console.log(button);
+            // console.log(button);
             return button;
           })
         })
@@ -56,7 +59,26 @@ bot.on("message", msg => {
         .sendMessage(chatId, "Ближайшие бары в радиусе 5 километров:", options)
         .then(() => {
           bot.once("message", answer => {
-            console.log({ answer });
+            request.post(
+              "http://localhost:8000/beers",
+              { form: { barTitle: answer.text } },
+              function(error, response, body) {
+                console.log(JSON.parse(body));
+                const prettyBeerList = _.map(
+                  JSON.parse(body).beerList,
+                  (beer, title) => {
+                    console.log({ beer });
+                    return `${emoji.beer} ${beer.title}\nПивоварня: ${beer.brewery}\nСтиль: ${beer.style}\nАлкоголь: ${beer.alc}%`;
+                  }
+                );
+                console.log(prettyBeerList);
+                bot.sendMessage(
+                  chatId,
+                  prettyBeerList.join("\n\n"),
+                  markDownOption
+                );
+              }
+            );
           });
         });
     } else {

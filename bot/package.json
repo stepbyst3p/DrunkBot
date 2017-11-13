@@ -8,6 +8,7 @@
     "babel-preset-env": "^1.6.1",
     "bluebird": "^3.5.1",
     "config": "^1.27.0",
+    "lodash": "^4.17.4",
     "node-emoji": "^1.8.1",
     "node-red": "^0.17.5",
     "node-red-contrib-chatbot": "^0.8.6",
