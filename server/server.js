@@ -6,6 +6,7 @@ const distance = require("gps-distance");
 const app = express();
 const _ = require("lodash");
 const geolib = require("geolib");
+
 // const firebase = require("./config/firebase");
 const admin = require("firebase-admin");
 const serviceAccount = require("./config/firebase_key.json");
@@ -14,7 +15,7 @@ admin.initializeApp({
   databaseURL: "https://beerbot-91a90.firebaseio.com"
 });
 const fb = admin.database();
-const ref = fb.ref("/bars");
+const ref = fb.ref("/users");
 
 const port = 8000;
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -32,25 +33,67 @@ app.post("/bars", (req, res) => {
   };
   ref.once("value", function(snapshot) {
     const Data = snapshot.val();
-    console.log(Data);
-    const bars = _.map(Data, (spot, barId) => ({
-      title: spot.title,
-      geocode: spot.geocode,
-      barId
-    }));
-    const geocodes = _.map(bars, (bar, title) => ({
-      [bar.title]: bar.geocode
-    }));
-    geocodes[bars.title] = bars.geocode;
-    console.log(geocodes);
+
+    const obj = Object.values(Data).map(x => x.bars);
+    const barsCollection = Object.values(obj).map(x => {
+      let bors = Object.values(x).map(bar => ({
+        //         let truebars = {
+        // title: bar.title,
+        // address: bar.address,
+        // geocode: bar.geocode,
+        // beers: bar.beers
+        //         };
+        //         const geocodes = {
+        [bar.address]: bar.geocode
+        //         };
+      }));
+      return bors;
+    });
+    let result = barsCollection.map(a => a.geocode);
+    let resultishe = [].concat.apply([], barsCollection);
+    let geocodes = resultishe.reduce(function(acc, x) {
+      for (var key in x) acc[key] = x[key];
+      return acc;
+    }, {});
+    // console.log(geocodes);
+
     const sortedGeocodes = geolib.orderByDistance(geo, geocodes, 500);
-    console.log(sortedGeocodes);
+
+    const bars = Object.values(obj).map(x => {
+      let bors = Object.values(x).map(bar => ({
+        title: bar.title,
+        address: bar.address,
+        geocode: bar.geocode,
+        beers: bar.beers
+      }));
+      return bors;
+    });
+
+    // let asd = bars.map(a => {a.title, a.address, a.geocode, a.beers});
+    let qwe = [].concat.apply([], bars);
+
+    console.log(qwe);
+    console.log(sortedGeocodes[0].key);
+    let meow = _.find(bars, { address: sortedGeocodes[0].key });
+    console.log(meow);
+
+    // // const bars = _.map(Data, (spot, barId) => ({
+    //   title: spot.title,
+    //   geocode: spot.geocode,
+    //   barId
+    // }));
+    // const geocodes = _.map(bars, (bar, title) => ({
+    //   [bar.title]: bar.geocode
+    // }));
+    // geocodes[bars.title] = bars.geocode;
+    // console.log(geocodes);
     // _.find(spots, { geocode: sortedGeocodes[0] });
     // res.send(sortedGeocodesn.slice(0, 5));
   });
 });
 
 app.post("/beers", (req, res) => {
+  n;
   const barTitle = req.body.barTitle;
   // console.log(req.body);
   ref.once("value", function(snapshot) {
