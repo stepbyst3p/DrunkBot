@@ -72,9 +72,15 @@ app.post("/bars", (req, res) => {
     // let asd = bars.map(a => {a.title, a.address, a.geocode, a.beers});
     let qwe = [].concat.apply([], bars);
 
-    console.log(qwe);
-    console.log(sortedGeocodes[0].key);
-    let meow = _.find(bars, { address: sortedGeocodes[0].key });
+    // console.log(qwe);
+    // console.log(sortedGeocodes[0].key);
+    let meow = {
+      result1: _.find(qwe, { address: sortedGeocodes[0].key }),
+      result2: _.find(qwe, { address: sortedGeocodes[1].key }),
+      result3: _.find(qwe, { address: sortedGeocodes[2].key }),
+      result4: _.find(qwe, { address: sortedGeocodes[3].key }),
+      result5: _.find(qwe, { address: sortedGeocodes[4].key })
+    };
     console.log(meow);
 
     // // const bars = _.map(Data, (spot, barId) => ({
