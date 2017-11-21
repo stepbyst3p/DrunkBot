@@ -83,6 +83,7 @@ app.post("/bars", (req, res) => {
     };
     console.log(meow);
 
+    res.send(meow);
     // // const bars = _.map(Data, (spot, barId) => ({
     //   title: spot.title,
     //   geocode: spot.geocode,
@@ -99,23 +100,46 @@ app.post("/bars", (req, res) => {
 });
 
 app.post("/beers", (req, res) => {
-  n;
   const barTitle = req.body.barTitle;
-  // console.log(req.body);
+  console.log(barTitle);
   ref.once("value", function(snapshot) {
     const Data = snapshot.val();
-    // console.log(Data);
-    const beers = _.find(Data, o => {
-      return o.title === barTitle;
+    const obj = Object.values(Data).map(x => x.bars);
+    const barsCollection = Object.values(obj).map(x => {
+      let bors = Object.values(x).map(bar => ({
+        //         let truebars = {
+        // title: bar.title,
+        // address: bar.address,
+        // geocode: bar.geocode,
+        // beers: bar.beers
+        //         };
+        //         const geocodes = {
+        title: bar.title,
+        beers: bar.beers
+        //         };
+      }));
+      return bors;
     });
-    const beerList = _.map(beers.beers, (beer, beerTitle) => ({
+    let qwe = [].concat.apply([], barsCollection);
+    const thisBar = _.find(qwe, { title: barTitle });
+
+    // let asd = bars.map(a => {a.title, a.address, a.geocode, a.beers});
+    // let qwe = [].concat.apply([], beers);
+    // const huirs = _.find(qwe, { barTitle: barTitle });
+    // const beers = _.find(qwe, o => {
+    //   return o.title === barTitle;
+    // });
+
+    const beerList = _.map(thisBar.beers, beer => ({
       title: beer.beerTitle,
       brewery: beer.beerBrewery,
       style: beer.beerStyle,
       alc: beer.beerAlc
     }));
+
+    // }));
     // console.log(beers.beers);
-    console.log(beerList);
-    res.send({ beerList });
+    // console.log(beerList);
+    res.send(beerList);
   });
 });

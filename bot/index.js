@@ -9,13 +9,6 @@ const headers = {
   "Content-Type": "application/x-www-form-urlencoded"
 };
 
-const optionsBars = {
-  url: "http://localhost:8000/bars",
-  method: "POST",
-  headers: headers,
-  form: { lat: "xxx", lng: "yyy" }
-};
-
 const optionsBeers = {
   url: "http://localhost:8000/beers",
   method: "POST",
@@ -34,20 +27,27 @@ bot.onText(/\/echo (.+)/, (msg, match) => {
   bot.sendMessage(chatId, resp);
 });
 
-bot.on("message", msg => {
+bot.on("location", msg => {
   const chatId = msg.chat.id;
+
+  const optionsBars = {
+    url: "http://localhost:8000/bars",
+    method: "POST",
+    headers: headers,
+    form: { lat: msg.location.latitude, lng: msg.location.longitude }
+  };
   // console.log(msg.location);
   request(optionsBars, function(error, response, body) {
     if (!error) {
       const bars = JSON.parse(body);
-
+      console.log(bars);
       let options = {
         reply_markup: JSON.stringify({
-          keyboard: bars.map(bar => {
+          keyboard: _.map(bars, bar => {
             const button = [
               {
                 text: bar.title,
-                callback_data: bar.barId
+                callback_data: bar.address
               }
             ];
             // console.log(button);
@@ -65,7 +65,7 @@ bot.on("message", msg => {
               function(error, response, body) {
                 console.log(JSON.parse(body));
                 const prettyBeerList = _.map(
-                  JSON.parse(body).beerList,
+                  JSON.parse(body),
                   (beer, title) => {
                     console.log({ beer });
                     return `${emoji.beer} ${beer.title}\nПивоварня: ${beer.brewery}\nСтиль: ${beer.style}\nАлкоголь: ${beer.alc}%`;
