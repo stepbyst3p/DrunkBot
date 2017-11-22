@@ -68,7 +68,7 @@ bot.on("location", msg => {
                   JSON.parse(body),
                   (beer, title) => {
                     console.log({ beer });
-                    return `${emoji.beer} ${beer.title}\nПивоварня: ${beer.brewery}\nСтиль: ${beer.style}\nАлкоголь: ${beer.alc}%`;
+                    return `${emoji.beer} ${beer.title}\nПивоварня: ${beer.brewery}\nСтиль: ${beer.style}\nАлкоголь: ${beer.alc}`;
                   }
                 );
                 console.log(prettyBeerList);
